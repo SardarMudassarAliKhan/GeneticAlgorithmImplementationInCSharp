@@ -43,7 +43,7 @@ namespace GeneticAlgorithmImplementationInCSharp
             offspringPopulation = new List<Chromosome>();
             random = new Random();
 
-            offspringPopulationSize = (int)(populationSize * generationGap);
+            offspringPopulationSize = populationSize * 2;
 
             InitializePopulation();
         }
@@ -55,6 +55,28 @@ namespace GeneticAlgorithmImplementationInCSharp
                 Chromosome chromosome = new Chromosome(chromosomeSize, alleleBase, alleleRange, random);
                 population.Add(chromosome);
             }
+        }
+
+        public double GetAverageFitness()
+        {
+            double totalFitness = 0;
+            foreach (Chromosome chromosome in population)
+            {
+                totalFitness += chromosome.CalculateFitness();
+            }
+            return totalFitness / population.Count;
+        }
+
+        public Chromosome GetBestChromosome()
+        {
+            population.Sort((x, y) => y.CalculateFitness().CompareTo(x.CalculateFitness()));
+            return population[0];
+        }
+
+        public List<Chromosome> GetTopNChromosomes(int n)
+        {
+            population.Sort((x, y) => y.CalculateFitness().CompareTo(x.CalculateFitness()));
+            return population.GetRange(0, Math.Min(n, population.Count));
         }
 
         public void RunGA()
@@ -72,6 +94,17 @@ namespace GeneticAlgorithmImplementationInCSharp
 
                 UpdatePopulation();
                 Console.WriteLine($"Generation {generation + 1}: Population updated.");
+
+                // Perform analysis after each generation
+                Console.WriteLine($"Generation {generation + 1} Analysis:");
+                Console.WriteLine($"Average Fitness: {GetAverageFitness()}");
+                Console.WriteLine($"Best Chromosome: {GetBestChromosome()}");
+                Console.WriteLine($"Top 3 Chromosomes: ");
+                List<Chromosome> top3 = GetTopNChromosomes(3);
+                foreach (var chromosome in top3)
+                {
+                    Console.WriteLine(chromosome.ToString());
+                }
             }
         }
 
